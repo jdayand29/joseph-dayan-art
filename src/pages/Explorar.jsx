@@ -17,49 +17,76 @@ export default function Explorar() {
     return ['Todos', ...new Set(combos)]
   }, [])
 
+  const q = query.trim().toLowerCase()
+
+  // Artistas/galerías dentro de la ciudad elegida, antes de aplicar el texto de búsqueda.
+  const locationArtists = useMemo(
+    () => artists.filter((a) => location === 'Todos' || `${a.city}, ${a.country}` === location),
+    [location],
+  )
+  const locationGalleries = useMemo(
+    () => galleries.filter((g) => location === 'Todos' || `${g.city}, ${g.country}` === location),
+    [location],
+  )
+
   const filteredArtists = useMemo(() => {
-    return artists.filter((a) => {
-      const matchesQuery =
-        !query ||
-        a.name.toLowerCase().includes(query.toLowerCase()) ||
-        a.country.toLowerCase().includes(query.toLowerCase()) ||
-        a.city.toLowerCase().includes(query.toLowerCase())
-      const matchesLocation = location === 'Todos' || `${a.city}, ${a.country}` === location
-      return matchesQuery && matchesLocation
-    })
-  }, [query, location])
+    if (!q) return locationArtists
+    return locationArtists.filter(
+      (a) => a.name.toLowerCase().includes(q) || a.country.toLowerCase().includes(q) || a.city.toLowerCase().includes(q),
+    )
+  }, [locationArtists, q])
 
   const filteredGalleries = useMemo(() => {
-    return galleries.filter((g) => {
-      const matchesQuery =
-        !query ||
-        g.name.toLowerCase().includes(query.toLowerCase()) ||
-        g.country.toLowerCase().includes(query.toLowerCase()) ||
-        g.city.toLowerCase().includes(query.toLowerCase())
-      const matchesLocation = location === 'Todos' || `${g.city}, ${g.country}` === location
-      return matchesQuery && matchesLocation
-    })
-  }, [query, location])
+    if (!q) return locationGalleries
+    return locationGalleries.filter(
+      (g) => g.name.toLowerCase().includes(q) || g.country.toLowerCase().includes(q) || g.city.toLowerCase().includes(q),
+    )
+  }, [locationGalleries, q])
 
+  // Las obras se buscan también por título y estilo, no solo por el artista/galería.
   const filteredArtworks = useMemo(() => {
     if (tab === 'artistas') {
-      const artistIds = new Set(filteredArtists.map((a) => a.id))
-      return artworks.filter((w) => artistIds.has(w.artistId))
+      const idsInLocation = new Set(locationArtists.map((a) => a.id))
+      return artworks.filter((w) => {
+        if (!idsInLocation.has(w.artistId)) return false
+        if (!q) return true
+        const artist = artists.find((a) => a.id === w.artistId)
+        return (
+          w.title.toLowerCase().includes(q) ||
+          w.style.toLowerCase().includes(q) ||
+          artist?.name.toLowerCase().includes(q) ||
+          artist?.city.toLowerCase().includes(q) ||
+          artist?.country.toLowerCase().includes(q)
+        )
+      })
     }
-    const galleryArtistIds = new Set(filteredGalleries.flatMap((g) => getArtistsByGallery(g.id).map((a) => a.id)))
-    return artworks.filter((w) => galleryArtistIds.has(w.artistId))
-  }, [artworks, filteredArtists, filteredGalleries, tab])
+    const galleryArtistIds = new Set(locationGalleries.flatMap((g) => getArtistsByGallery(g.id).map((a) => a.id)))
+    return artworks.filter((w) => {
+      if (!galleryArtistIds.has(w.artistId)) return false
+      if (!q) return true
+      const gallery = galleries.find((g) => getArtistsByGallery(g.id).some((a) => a.id === w.artistId))
+      return (
+        w.title.toLowerCase().includes(q) ||
+        w.style.toLowerCase().includes(q) ||
+        gallery?.name.toLowerCase().includes(q) ||
+        gallery?.city.toLowerCase().includes(q) ||
+        gallery?.country.toLowerCase().includes(q)
+      )
+    })
+  }, [artworks, locationArtists, locationGalleries, tab, q])
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="font-serif text-3xl font-semibold mb-2">Explorar arte del mundo</h1>
-      <p className="text-ink/60 mb-6">Elige una ciudad para ver qué artistas y galerías hay ahí, o busca por nombre.</p>
+      <p className="text-ink/60 mb-6">
+        Elige una ciudad para ver qué artistas y galerías hay ahí, o busca por artista, obra, estilo, galería o país.
+      </p>
 
       <div className="flex flex-wrap gap-3 mb-4">
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar artista, galería, ciudad o país..."
+          placeholder="Ej. cubismo, Camila Reyes, Kioto..."
           className="rounded-full border border-ink/15 bg-white px-4 py-2 text-sm outline-none focus:border-ink/40"
         />
         <select

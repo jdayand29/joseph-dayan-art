@@ -9,6 +9,8 @@ import ArtistProfile from './pages/ArtistProfile'
 import PublishArtwork from './pages/PublishArtwork'
 import Carrito from './pages/Carrito'
 import GalleryProfile from './pages/GalleryProfile'
+// ChatWidget: pendiente de activar cuando se configure ANTHROPIC_API_KEY en Vercel.
+// import ChatWidget from './components/ChatWidget'
 
 export default function App() {
   return (
@@ -26,6 +28,7 @@ export default function App() {
             <Route path="/carrito" element={<Carrito />} />
             <Route path="/galeria/:id" element={<GalleryProfile />} />
           </Routes>
+          {/* <ChatWidget /> */}
         </div>
       </BrowserRouter>
     </AppStateProvider>

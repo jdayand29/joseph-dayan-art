@@ -1,28 +1,165 @@
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAppState } from '../store/AppState'
 import { artStyles } from '../data/styles'
+import { artists, getArtwork } from '../data/mockData'
 import ArtworkCard from '../components/ArtworkCard'
 
+const FEATURED_ARTIST_IDS = ['a1', 'a2', 'a3', 'a7', 'a8']
+const EXAMPLE_SOLD_ARTWORK_ID = 'w2'
+
 export default function Feed() {
-  const { artworks } = useAppState()
+  const { artworks, auctions } = useAppState()
   const [activeStyle, setActiveStyle] = useState('Todos')
+  const [minPrice, setMinPrice] = useState('')
+  const [maxPrice, setMaxPrice] = useState('')
+  const [sortBy, setSortBy] = useState('recientes')
+  const [onlyAvailable, setOnlyAvailable] = useState(false)
 
   const styleOptions = useMemo(() => ['Todos', ...artStyles], [])
+  const countries = useMemo(() => new Set(artists.map((a) => a.country)).size, [])
+  const featuredArtists = useMemo(
+    () => FEATURED_ARTIST_IDS.map((id) => artists.find((a) => a.id === id)).filter(Boolean),
+    [],
+  )
+  const exampleArtwork = artworks.find((w) => w.id === EXAMPLE_SOLD_ARTWORK_ID) ?? getArtwork(EXAMPLE_SOLD_ARTWORK_ID)
+
+  function effectivePrice(artwork) {
+    if (artwork.type === 'sale') return artwork.price
+    const auction = auctions.find((a) => a.id === artwork.auctionId)
+    return auction ? auction.currentBid : 0
+  }
+
+  function isAvailable(artwork) {
+    if (artwork.type === 'sale') return !artwork.sold
+    const auction = auctions.find((a) => a.id === artwork.auctionId)
+    return auction ? auction.endTime - Date.now() > 0 : false
+  }
 
   const filtered = useMemo(() => {
-    if (activeStyle === 'Todos') return artworks
-    return artworks.filter((w) => w.style === activeStyle)
-  }, [artworks, activeStyle])
+    let result = artworks
+
+    if (activeStyle !== 'Todos') {
+      result = result.filter((w) => w.style === activeStyle)
+    }
+    if (minPrice !== '') {
+      result = result.filter((w) => effectivePrice(w) >= Number(minPrice))
+    }
+    if (maxPrice !== '') {
+      result = result.filter((w) => effectivePrice(w) <= Number(maxPrice))
+    }
+    if (onlyAvailable) {
+      result = result.filter((w) => isAvailable(w))
+    }
+
+    result = [...result].sort((a, b) => {
+      if (sortBy === 'precio-asc') return effectivePrice(a) - effectivePrice(b)
+      if (sortBy === 'precio-desc') return effectivePrice(b) - effectivePrice(a)
+      if (sortBy === 'populares') return b.likes - a.likes
+      return b.year - a.year // recientes
+    })
+
+    return result
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artworks, auctions, activeStyle, minPrice, maxPrice, onlyAvailable, sortBy])
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-5">
-        <h1 className="font-serif text-3xl font-semibold">Descubre arte del mundo</h1>
-        <p className="text-ink/60">
-          Obras de artistas de México, Japón, Nigeria, Italia, Francia y más — publicadas hoy.
+      {/* Hero */}
+      <div className="mb-8">
+        <h1 className="font-serif text-3xl font-semibold sm:text-4xl">
+          Descubre y compra arte original de artistas de todo el mundo
+        </h1>
+        <p className="mt-2 max-w-2xl text-ink/60">
+          Obras de México, Japón, Nigeria, Italia, Francia y más — a precio fijo o en subasta, directo del artista o
+          de una galería.
         </p>
+        <div className="mt-4 flex flex-wrap gap-6 text-sm text-ink/60">
+          <span>
+            <strong className="text-ink">{artists.length}</strong> artistas
+          </span>
+          <span>
+            <strong className="text-ink">{countries}</strong> países
+          </span>
+          <span>
+            <strong className="text-ink">{artworks.length}</strong> obras publicadas
+          </span>
+        </div>
       </div>
 
+      {/* Artistas destacados */}
+      <div className="mb-10">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-ink/50">Artistas destacados</h2>
+        <div className="flex gap-3 overflow-x-auto pb-2">
+          {featuredArtists.map((artist) => (
+            <Link
+              key={artist.id}
+              to={`/perfil/${artist.id}`}
+              className="flex w-40 shrink-0 flex-col items-center rounded-2xl border border-ink/10 bg-white p-4 text-center shadow-sm hover:shadow-md"
+            >
+              <img src={artist.avatar} alt={artist.name} className="mb-2 h-16 w-16 rounded-full object-cover" />
+              <p className="text-sm font-semibold leading-tight">{artist.name}</p>
+              <p className="text-xs text-ink/50">
+                {artist.flag} {artist.country}
+              </p>
+              <p className="mt-1 text-xs text-ink/40">{artist.specialties?.[0]}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Cómo funciona + ejemplo real de transacción */}
+      <div className="mb-10 grid gap-6 rounded-2xl border border-ink/10 bg-white p-6 md:grid-cols-[1fr_auto]">
+        <div>
+          <h2 className="mb-4 text-sm font-semibold uppercase tracking-wide text-ink/50">Cómo funciona</h2>
+          <ol className="space-y-3 text-sm">
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-canvas">
+                1
+              </span>
+              <span>
+                <strong>Descubre</strong> obras por estilo, artista, galería o ciudad.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-canvas">
+                2
+              </span>
+              <span>
+                <strong>Compra directo o puja</strong> — cada artista elige cómo vender cada obra.
+              </span>
+            </li>
+            <li className="flex gap-3">
+              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-semibold text-canvas">
+                3
+              </span>
+              <span>
+                <strong>Recíbela en casa</strong>, con envío asegurado desde el país del artista.
+              </span>
+            </li>
+          </ol>
+        </div>
+
+        {exampleArtwork && (
+          <Link
+            to={`/obra/${exampleArtwork.id}`}
+            className="flex w-full items-center gap-3 rounded-xl border border-ink/10 p-3 hover:border-ink/30 md:w-64"
+          >
+            <img
+              src={exampleArtwork.image}
+              alt={exampleArtwork.title}
+              className="h-16 w-16 shrink-0 rounded-lg object-cover"
+            />
+            <div>
+              <p className="text-xs font-semibold text-green-700">✓ Ejemplo real de venta</p>
+              <p className="text-sm font-medium leading-tight">{exampleArtwork.title}</p>
+              <p className="text-xs text-ink/50">Comprada por un coleccionista en {exampleArtwork.soldTo}</p>
+            </div>
+          </Link>
+        )}
+      </div>
+
+      {/* Filtro de estilo */}
       <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
         {styleOptions.map((style) => (
           <button
@@ -39,8 +176,69 @@ export default function Feed() {
         ))}
       </div>
 
+      {/* Presupuesto, orden y disponibilidad */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <label className="text-xs text-ink/50">Presupuesto</label>
+          <input
+            type="number"
+            min="0"
+            value={minPrice}
+            onChange={(e) => setMinPrice(e.target.value)}
+            placeholder="Mín"
+            className="w-20 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-sm outline-none focus:border-ink/40"
+          />
+          <span className="text-ink/30">–</span>
+          <input
+            type="number"
+            min="0"
+            value={maxPrice}
+            onChange={(e) => setMaxPrice(e.target.value)}
+            placeholder="Máx"
+            className="w-20 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-sm outline-none focus:border-ink/40"
+          />
+        </div>
+
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-sm outline-none focus:border-ink/40"
+        >
+          <option value="recientes">Más recientes</option>
+          <option value="precio-asc">Precio: menor a mayor</option>
+          <option value="precio-desc">Precio: mayor a menor</option>
+          <option value="populares">Más populares</option>
+        </select>
+
+        <label className="flex items-center gap-2 text-sm text-ink/70">
+          <input
+            type="checkbox"
+            checked={onlyAvailable}
+            onChange={(e) => setOnlyAvailable(e.target.checked)}
+            className="h-4 w-4 rounded border-ink/30"
+          />
+          Solo disponibles
+        </label>
+
+        {(minPrice !== '' || maxPrice !== '' || onlyAvailable || sortBy !== 'recientes') && (
+          <button
+            onClick={() => {
+              setMinPrice('')
+              setMaxPrice('')
+              setOnlyAvailable(false)
+              setSortBy('recientes')
+            }}
+            className="text-xs text-ink/40 underline hover:text-ink"
+          >
+            Limpiar filtros
+          </button>
+        )}
+      </div>
+
       {filtered.length === 0 ? (
-        <p className="text-ink/50">No hay obras de este estilo todavía.</p>
+        <p className="text-ink/50">
+          No hay obras que coincidan con estos filtros. Prueba ampliando el presupuesto o quitando algún filtro.
+        </p>
       ) : (
         <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 xl:columns-4">
           {filtered.map((artwork) => (

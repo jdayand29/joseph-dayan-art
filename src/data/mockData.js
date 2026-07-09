@@ -146,6 +146,8 @@ export const artworks = [
     likes: 587,
     comments: 41,
     type: 'sale',
+    sold: true,
+    soldTo: 'Berlín, Alemania',
   },
   {
     id: 'w3',
