@@ -4,6 +4,7 @@ import { useAppState } from '../store/AppState'
 import { artStyles } from '../data/styles'
 import { artists, getArtwork } from '../data/mockData'
 import ArtworkCard from '../components/ArtworkCard'
+import SubscribeForm from '../components/SubscribeForm'
 
 const FEATURED_ARTIST_IDS = ['a1', 'a2', 'a3', 'a7', 'a8']
 const EXAMPLE_SOLD_ARTWORK_ID = 'w2'
@@ -246,6 +247,10 @@ export default function Feed() {
           ))}
         </div>
       )}
+
+      <div className="mt-16">
+        <SubscribeForm />
+      </div>
     </div>
   )
 }
