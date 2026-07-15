@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { getArtist } from '../data/mockData'
+import { getArtist } from '../legacy-data/mockData'
 import { useAppState } from '../store/AppState'
 import BidPanel from '../components/BidPanel'
 

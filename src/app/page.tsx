@@ -1,4 +1,4 @@
-import { artworks, artists, collections } from '@/lib/data/artworks'
+import { artworks, artists, collections } from '@/data/artworks'
 
 export default function Home() {
   return (

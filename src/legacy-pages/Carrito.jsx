@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { getArtist } from '../data/mockData'
+import { getArtist } from '../legacy-data/mockData'
 import { useAppState } from '../store/AppState'
 import CartCheckoutModal from '../components/CartCheckoutModal'
 

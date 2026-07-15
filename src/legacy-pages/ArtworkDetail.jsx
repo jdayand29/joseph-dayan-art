@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getArtist, getGallery, getMuseum, getCollection } from '../data/mockData'
+import { getArtist, getGallery, getMuseum, getCollection } from '../legacy-data/mockData'
 import { useAppState } from '../store/AppState'
 import BuyModal from '../components/BuyModal'
 import BidPanel from '../components/BidPanel'

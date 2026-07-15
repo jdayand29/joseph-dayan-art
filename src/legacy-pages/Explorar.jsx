@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { artists, galleries, museums, getArtistsByGallery } from '../data/mockData'
+import { artists, galleries, museums, getArtistsByGallery } from '../legacy-data/mockData'
 import { useAppState } from '../store/AppState'
 import ArtworkCard from '../components/ArtworkCard'
 

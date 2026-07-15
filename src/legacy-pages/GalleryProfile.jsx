@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom'
-import { getGallery, getArtistsByGallery } from '../data/mockData'
+import { getGallery, getArtistsByGallery } from '../legacy-data/mockData'
 import { useAppState } from '../store/AppState'
 import ArtworkCard from '../components/ArtworkCard'
 

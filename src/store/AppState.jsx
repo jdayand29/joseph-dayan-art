@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo, useState } from 'react'
-import { artworks as initialArtworks, auctions as initialAuctions } from '../data/mockData'
+import { artworks as initialArtworks, auctions as initialAuctions } from '../legacy-data/mockData'
 
 const AppStateContext = createContext(null)
 const ROLE_KEY = 'colectart_role'

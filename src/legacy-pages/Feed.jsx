@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAppState } from '../store/AppState'
-import { artStyles } from '../data/styles'
-import { artists } from '../data/mockData'
+import { artStyles } from '../legacy-data/styles'
+import { artists } from '../legacy-data/mockData'
 import ArtworkCard from '../components/ArtworkCard'
 import SubscribeForm from '../components/SubscribeForm'
 

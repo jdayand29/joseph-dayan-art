@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { artStyles } from '../data/styles'
+import { artStyles } from '../legacy-data/styles'
 import ImageEditor from '../components/ImageEditor'
 
 export default function PublishArtwork() {
