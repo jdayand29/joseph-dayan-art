@@ -7,23 +7,30 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "dev:next": "next dev",
+    "build:next": "next build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
+    "next": "^16.2.10",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-easy-crop": "^6.2.2",
     "react-router-dom": "^7.18.1"
   },
   "devDependencies": {
+    "@types/node": "^20",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
     "autoprefixer": "^10.5.2",
+    "eslint": "^9",
+    "eslint-config-next": "^16.2.10",
     "oxlint": "^1.71.0",
     "postcss": "^8.5.16",
     "tailwindcss": "^3.4.19",
+    "typescript": "^5",
     "vite": "^8.1.1"
   }
 }
