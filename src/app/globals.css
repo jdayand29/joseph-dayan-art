@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Variables CSS documentadas en src/styles/tokens/theme.ts. El bloque
+ * [data-theme="dark"] existe para que la arquitectura ya contemple dark mode
+ * (Documento Maestro) — nada en el sitio setea ese atributo todavía, no hay
+ * ThemeProvider ni toggle. Al subir a Tailwind v4 (cutover) estas variables
+ * pasan a ser leídas directamente vía @theme, sin tocar componentes.
+ */
+:root {
+  --color-ink: #141210;
+  --color-ink-soft: #4a4540;
+  --color-canvas: #faf8f5;
+  --color-canvas-alt: #f1ede6;
+  --color-line: #e4ded4;
+  --color-gold: #a97e42;
+  --color-gold-soft: rgba(169, 126, 66, 0.12);
+}
+
+:root[data-theme='dark'] {
+  --color-ink: #f1ede6;
+  --color-ink-soft: #b8b0a6;
+  --color-canvas: #14120f;
+  --color-canvas-alt: #1c1916;
+  --color-line: #33302a;
+  --color-gold: #c79a5c;
+  --color-gold-soft: rgba(199, 154, 92, 0.16);
+}
+
 html,
 body {
   height: 100%;
