@@ -8,6 +8,7 @@ import {
   getAllCollections,
 } from '@/lib/repositories/artworkRepository'
 import ArtworkCard from '@/components/artwork/ArtworkCard'
+import CollectionCard from '@/components/artwork/CollectionCard'
 
 export const metadata: Metadata = {
   title: 'Joseph Dayan',
@@ -24,6 +25,8 @@ export default function Home() {
 
   return (
     <div>
+      <h1 className="sr-only">{artist.name}</h1>
+
       {/* Hero: una sola obra */}
       <section className="relative">
         <Image
@@ -61,15 +64,7 @@ export default function Home() {
       <section className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-6 sm:grid-cols-2">
           {collections.map((collection) => (
-            <Link
-              key={collection.id}
-              href={`/coleccion/${collection.id}`}
-              className="rounded-3xl bg-white p-8 shadow-card hover:shadow-card-hover"
-            >
-              <h3 className="font-serif text-2xl font-medium">{collection.name}</h3>
-              <p className="mt-2 text-sm text-ink/60">{collection.description}</p>
-              <span className="mt-4 inline-block text-sm font-medium">Explorar la serie →</span>
-            </Link>
+            <CollectionCard key={collection.id} collection={collection} />
           ))}
         </div>
       </section>
