@@ -27,6 +27,13 @@ export function getArtworksByCollection(collectionSlug: string): Artwork[] {
   return artworks.filter((w) => w.collectionId === collectionSlug)
 }
 
+// Estilos realmente presentes en el catálogo actual, no el taxonomía completa
+// de src/data/styles.ts (19 movimientos, la mayoría sin ninguna obra) — evita
+// mostrar chips de filtro vacíos.
+export function getArtworkStyles(): string[] {
+  return [...new Set(artworks.map((w) => w.style))].sort()
+}
+
 // Sitio de un solo artista: no hay parámetro de búsqueda, siempre es Joseph.
 export function getArtist(): Artist {
   return artists[0]
