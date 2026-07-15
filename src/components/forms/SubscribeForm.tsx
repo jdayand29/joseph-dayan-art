@@ -1,28 +1,23 @@
 'use client'
 
 import { useState } from 'react'
-
-type Status = 'idle' | 'loading' | 'done' | 'error'
+import { useSubmitStatus } from '@/hooks/useSubmitStatus'
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState('')
-  const [status, setStatus] = useState<Status>('idle')
+  const { status, run } = useSubmitStatus()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setStatus('loading')
-    try {
+    await run(async () => {
       const res = await fetch('/api/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       })
-      if (!res.ok) throw new Error()
-      setStatus('done')
-      setEmail('')
-    } catch {
-      setStatus('error')
-    }
+      if (res.ok) setEmail('')
+      return res.ok
+    })
   }
 
   if (status === 'done') {
