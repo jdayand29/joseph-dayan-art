@@ -101,11 +101,17 @@ Una carpeta "aún vacía" existe en la estructura porque su necesidad ya está j
 
 ## Motion Rules
 
-(Arquitectura aprobada, implementación en la Fase F del Sistema de Diseño.)
-
-- Ningún componente escribe un objeto de animación inline (`{ opacity: 0, y: 24 }`) — todos importan variants con nombre desde `styles/motion/`.
-- Toda animación consulta `useReducedMotion` y ofrece una versión reducida — no es opcional por componente.
+- Ningún componente escribe un objeto de animación inline (`{ opacity: 0, y: 24 }`) — todos importan variants con nombre desde `styles/motion/` (JS-driven) o clases con nombre del catálogo CSS de `tailwind.config.js` (overlays).
+- Toda animación consulta `useReducedMotion` (JS) o su equivalente `motion-reduce:` (CSS) y ofrece una versión reducida — no es opcional por componente.
 - Duraciones/curvas vienen de `styles/tokens/motion.ts` — nunca un `duration-300` elegido a ojo sin corresponder a un token.
+
+### Dos catálogos de animación, y por qué
+
+- **Dialog / Drawer / Popover / Tooltip** — CSS puro (`@keyframes` + `animation-name`, clases `data-[state=open]:animate-*`/`data-[state=closed]:animate-*` en `tailwind.config.js`). Radix emite `data-state` y su `Presence` interno detecta el fin de la animación antes de desmontar — sin `forceMount`, sin levantar el estado `open` al consumidor, sin cambiar la API pública de estos 4 componentes.
+- **Accordion** — también CSS, pero con `@keyframes` sobre `height` referenciando `var(--radix-accordion-content-height)` (patrón oficial de Radix), **no** una `transition` continua sobre `grid-template-rows`. Se probó empíricamente que la técnica de grid (`transition: grid-template-rows; data-[state=open]:grid-rows-[1fr]`) no interpola: `@radix-ui/react-collapsible` fuerza `transitionDuration:0s`/`animationName:none` inline en cada toggle (para medir el alto real sin interferencia y calcular esa misma CSS variable), lo que mata cualquier `transition` propio en el nodo — pero restaura `animationName` a tiempo, por lo que un `animation` (`@keyframes`) sí funciona correctamente.
+- **`Reveal`/`Stagger`** (`components/ui/`) — Motion (`motion/react`, con `LazyMotion`+`domAnimation`), no CSS: necesitan disparo por scroll (`whileInView`) y cascada entre hijos, que CSS/Intersection Observer no resuelven idiomáticamente. `Reveal` y `Stagger` siempre renderizan el mismo árbol (mismo componente `m.div`/`m.li`/etc., siempre envuelto en `LazyMotion`) — solo cambian las props de animación (`initial`/`whileInView`/`animate`) según `useReducedMotion()`. **No alternar entre un componente animado y un elemento plano según una condición** (p. ej. `if (reducedMotion) return <div>` vs `return <motion.div>`): Motion aplica estilos de forma imperativa, fuera del diffing de React, y un cambio de forma del árbol entre renders deja un `opacity`/`transform` inline colgado que React nunca limpia — probado empíricamente (bajo reduced motion el contenido quedaba invisible para siempre hasta corregirlo).
+- `Reveal` acepta un `variant` (`fade`/`scale`/`slideUp`/`slideDown`/`slideLeft`/`slideRight`, de `styles/motion/variants.ts`, `motionVariants`). `Stagger` provee un Context interno (no exportado) que sus `Reveal` hijos leen para heredar el trigger del contenedor en cascada, en vez de auto-dispararse cada uno por separado.
+- Ninguno de los dos primitivos (`Reveal`/`Stagger`) tiene consumidores reales todavía — construidos y verificados en un harness temporal, sin aplicarse a ninguna página (Fase G/H/I decide dónde).
 
 ## Toast Pattern
 

@@ -29,11 +29,27 @@ export function AccordionTrigger({ className, children, ...props }: ComponentPro
   )
 }
 
-export function AccordionContent({ className, ...props }: ComponentProps<typeof RadixAccordion.Content>) {
+// Alto animado con @keyframes (animation-name) referenciando
+// var(--radix-accordion-content-height) — patrón oficial de Radix (Fase F).
+// Se probó primero un `transition` continuo sobre grid-template-rows
+// (0fr↔1fr) y NO funcionó: @radix-ui/react-collapsible fuerza
+// `transitionDuration:0s`/`animationName:none` inline en cada toggle para
+// medir el alto real sin interferencia (así calcula esa misma CSS
+// variable), lo que mata cualquier `transition` propio en el nodo — pero
+// restaura `animationName` a tiempo para que un `animation` (@keyframes)
+// si funcione correctamente.
+export function AccordionContent({ className, children, ...props }: ComponentProps<typeof RadixAccordion.Content>) {
   return (
     <RadixAccordion.Content
-      className={clsx('overflow-hidden text-sm text-ink/70 data-[state=open]:py-3', className)}
+      className={clsx(
+        'overflow-hidden text-sm text-ink/70',
+        'data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up',
+        'motion-reduce:data-[state=open]:animate-none motion-reduce:data-[state=closed]:animate-none',
+        className,
+      )}
       {...props}
-    />
+    >
+      <div className="pb-3">{children}</div>
+    </RadixAccordion.Content>
   )
 }
