@@ -1,7 +1,7 @@
 'use client'
 
 import * as RadixDialog from '@radix-ui/react-dialog'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import clsx from 'clsx'
 import IconButton from '@/components/ui/IconButton'
 
@@ -14,17 +14,23 @@ import IconButton from '@/components/ui/IconButton'
 export const Dialog = RadixDialog.Root
 export const DialogTrigger = RadixDialog.Trigger
 
-interface DialogContentProps {
+interface DialogContentProps extends Omit<ComponentProps<typeof RadixDialog.Content>, 'title'> {
   children: ReactNode
   title: string
   /** Título visualmente oculto pero requerido por Radix para lectores de
    * pantalla — usar cuando el diseño no muestra un <h2> visible. */
   hideTitle?: boolean
   description?: string
-  className?: string
 }
 
-export function DialogContent({ children, title, hideTitle, description, className }: DialogContentProps) {
+export function DialogContent({
+  children,
+  title,
+  hideTitle,
+  description,
+  className,
+  ...props
+}: DialogContentProps) {
   return (
     <RadixDialog.Portal>
       <RadixDialog.Overlay className="fixed inset-0 z-overlay bg-ink/50" />
@@ -36,6 +42,7 @@ export function DialogContent({ children, title, hideTitle, description, classNa
           'fixed left-1/2 top-1/2 z-modal w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-card bg-white p-6 shadow-elevated outline-none',
           className,
         )}
+        {...props}
       >
         <RadixDialog.Title className={clsx('font-serif text-xl font-medium', hideTitle && 'sr-only')}>
           {title}

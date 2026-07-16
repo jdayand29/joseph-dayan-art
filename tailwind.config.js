@@ -77,11 +77,13 @@ export default {
         subtle: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
       },
       zIndex: {
+        // dropdown > modal: un Select/Popover/Tooltip anidado dentro de un
+        // Dialog debe pintarse sobre su overlay (ver src/styles/tokens/zIndex.ts).
         header: '40',
-        dropdown: '50',
         overlay: '100',
         modal: '200',
-        toast: '300',
+        dropdown: '300',
+        toast: '400',
       },
       transitionDuration: {
         550: '550ms',

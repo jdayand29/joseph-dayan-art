@@ -47,6 +47,7 @@ src/app/                 rutas — orquestan repositorios/servicios y componente
 4. No duplicar lógica, estilos ni animaciones — si dos componentes necesitan "lo mismo", se extrae antes de escribir el segundo (precedente: `useSubmitStatus`, `CollectionCard`, `ArtworkLightbox`).
 5. Preferir composición (`children`/slots) sobre props de configuración gigantes — más de ~3 variantes booleanas en un componente es señal de que debería dividirse.
 6. Todo componente interactivo se prueba con teclado y tiene estado de foco visible antes de darse por terminado.
+7. Un wrapper sobre un primitivo de Radix (`DialogContent`, `PopoverContent`, `SelectContent`, etc.) siempre reenvía las props restantes del primitivo subyacente (`ComponentProps<typeof Radix.X> & {...}`, spread de `...props`) — nunca una interfaz cerrada con solo los campos usados hoy. Corregido en la auditoría post-Fase E: `DialogContent`/`DrawerContent`/`PopoverContent`/`SelectContent` no reenviaban props como `onOpenAutoFocus`/`align`/`sideOffset`, bloqueando casos reales cercanos en el roadmap (p. ej. Framer Motion en Fase F necesita pasar `forceMount` a `Dialog.Content`).
 
 ## Naming
 
@@ -96,6 +97,7 @@ Una carpeta "aún vacía" existe en la estructura porque su necesidad ya está j
 - `tailwind.config.js` es un espejo manual de los tokens mientras el proyecto conviva con Vite en Tailwind v3 (ver comentario en el propio archivo) — cualquier cambio de valor se hace en ambos lugares hasta el cutover a v4.
 - `accent` (botones sólidos) es el único grupo de color heredado sin tokenizar todavía — su reemplazo es una decisión del primitivo `Button` (Fase D/I del Sistema de Diseño), no se improvisa antes.
 - `gold` nunca es el fondo de un botón grande — es condimento (links, bordes, detalles), regla explícita del Documento Maestro.
+- Orden de `zIndex` (`tokens/zIndex.ts`): `header < overlay < modal < dropdown < toast`. `dropdown` va por encima de `modal` a propósito — un Select/Popover/Tooltip anidado dentro de un Dialog debe pintarse sobre su overlay, no debajo (bug real encontrado y corregido en la auditoría post-Fase E: el orden anterior atrapaba visualmente y bloqueaba los clics de un Select abierto dentro de un Dialog).
 
 ## Motion Rules
 
@@ -107,8 +109,9 @@ Una carpeta "aún vacía" existe en la estructura porque su necesidad ya está j
 
 ## Toast Pattern
 
-- `providers/ToastProvider` mantiene un único `Toast.Root` (`@radix-ui/react-toast`) siempre montado, alternando su prop `open` — nunca un array de instancias creadas/destruidas dinámicamente vía `.map()`. Montar una instancia nueva de `Toast.Root` ya con `open`/`defaultOpen` en `true` en el mismo render dispara `onOpenChange(false)` inmediatamente (confirmado empíricamente); el patrón oficial del mantenedor (Radix `primitives` discusión #2907) es dejar el `Root` montado y solo alternar `open`.
-- Consecuencia: un solo toast visible a la vez. Disparar uno mientras otro sigue abierto reemplaza su contenido en vez de apilarlo — suficiente para los casos reales del sitio (confirmación de envío, error de formulario); si en el futuro se necesita una cola de varios toasts simultáneos, requiere rediseñar `ToastProvider`, no `ui/Toast.tsx`.
+- `providers/ToastProvider` mantiene un array de mensajes; cada uno monta su propia instancia de `Toast.Root` (`@radix-ui/react-toast`) vía `.map()` con `key` estable — mismo patrón que shadcn/ui. Soporta varios toasts simultáneos apilados en el viewport; cerrar uno (manual, Escape o auto-dismiss) solo lo remueve a él, sin afectar a los demás.
+- Un diseño anterior usaba una única instancia de `Toast.Root` siempre montada (alternando solo `open`), adoptado durante la implementación inicial tras atribuir un bug de cierre inmediato al patrón array-based. Una auditoría posterior reprodujo ese patrón de forma aislada y fiel (array de mensajes, `.map()`, montaje fresco por toast, con y sin `open` controlado, `duration` real de 5000ms, hasta tres toasts simultáneos) y **no encontró el bug** — se apilaron y cerraron correctamente en todos los casos. La causa real del cierre inmediato observado originalmente nunca se identificó con certeza; lo más probable es que fuera un artefacto de la sesión de depuración en vivo (Fast Refresh/HMR de Turbopack), no una limitación de Radix ni del patrón array-based. Se migró a este patrón tras esa comprobación.
+- `useToast()`/`toast({ title, description })` (API pública) y `ui/Toast.tsx` (presentación) no cambiaron con esta migración — el array-based es un cambio interno de `ToastProvider`, transparente para cualquier consumidor.
 
 ## Accessibility Checklist
 

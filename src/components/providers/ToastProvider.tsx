@@ -14,31 +14,49 @@ interface ToastContextValue {
 
 export const ToastContext = createContext<ToastContextValue | null>(null)
 
+interface ToastEntry extends ToastMessage {
+  id: number
+}
+
+let nextId = 0
+
 // Provider real (estado + orquestación) sobre los primitivos presentacionales
 // de ui/Toast.tsx — se monta una sola vez en la raíz de la app el día que el
 // primer consumidor real lo necesite (Fase J: SubscribeForm/ContactForm).
 //
-// Patrón oficial de Radix (no un array de instancias montadas/desmontadas
-// dinámicamente vía .map): un único Toast.Root permanece siempre montado,
-// solo se alterna su prop `open` — confirmado con el mantenedor de Radix
-// (github.com/radix-ui/primitives, discusión #2907). Un segundo toast
-// mientras el primero sigue visible reemplaza su contenido, no apila varios
-// — suficiente para los casos reales de este sitio (confirmación de envío,
-// error de formulario), nunca notificaciones simultáneas múltiples.
+// Cada toast es una instancia propia de Toast.Root, montada/desmontada vía
+// `.map()` sobre un array de mensajes (mismo patrón que shadcn/ui) — soporta
+// varios toasts simultáneos apilados en el viewport. Un patrón anterior de
+// instancia única fue reemplazado por este tras comprobar en una auditoría
+// que el bug que lo motivó no era reproducible con el patrón array-based
+// (ver ARCHITECTURE.md, sección "Toast Pattern").
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [open, setOpen] = useState(false)
-  const [message, setMessage] = useState<ToastMessage>({ title: '' })
+  const [toasts, setToasts] = useState<ToastEntry[]>([])
 
-  const toast = useCallback((next: ToastMessage) => {
-    setMessage(next)
-    setOpen(true)
+  const toast = useCallback((message: ToastMessage) => {
+    const id = nextId++
+    setToasts((prev) => [...prev, { ...message, id }])
+  }, [])
+
+  const dismiss = useCallback((id: number) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id))
   }, [])
 
   return (
     <ToastContext.Provider value={{ toast }}>
       <ToastPrimitiveProvider swipeDirection="right">
         {children}
-        <Toast open={open} onOpenChange={setOpen} title={message.title} description={message.description} />
+        {toasts.map((t) => (
+          <Toast
+            key={t.id}
+            defaultOpen
+            title={t.title}
+            description={t.description}
+            onOpenChange={(open) => {
+              if (!open) dismiss(t.id)
+            }}
+          />
+        ))}
         <ToastViewport />
       </ToastPrimitiveProvider>
     </ToastContext.Provider>

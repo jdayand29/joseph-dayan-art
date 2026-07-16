@@ -1,11 +1,12 @@
 'use client'
 
 import * as RadixSelect from '@radix-ui/react-select'
-import type { ComponentProps, ReactNode } from 'react'
+import type { ComponentProps } from 'react'
 import clsx from 'clsx'
 import { focusRingClassName } from '@/styles/tokens/focus'
 
 export const Select = RadixSelect.Root
+export const SelectValue = RadixSelect.Value
 
 export function SelectItem({ className, children, ...props }: ComponentProps<typeof RadixSelect.Item>) {
   return (
@@ -39,15 +40,12 @@ export function SelectTrigger({ className, children, ...props }: ComponentProps<
   )
 }
 
-export function SelectValue(props: ComponentProps<typeof RadixSelect.Value>) {
-  return <RadixSelect.Value {...props} />
-}
-
-export function SelectContent({ children, className }: { children: ReactNode; className?: string }) {
+export function SelectContent({ children, className, ...props }: ComponentProps<typeof RadixSelect.Content>) {
   return (
     <RadixSelect.Portal>
       <RadixSelect.Content
         className={clsx('z-dropdown overflow-hidden rounded-card bg-white shadow-elevated', className)}
+        {...props}
       >
         <RadixSelect.Viewport className="p-1">{children}</RadixSelect.Viewport>
       </RadixSelect.Content>

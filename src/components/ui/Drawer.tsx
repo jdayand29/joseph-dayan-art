@@ -1,7 +1,7 @@
 'use client'
 
 import * as RadixDialog from '@radix-ui/react-dialog'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import clsx from 'clsx'
 import IconButton from '@/components/ui/IconButton'
 
@@ -13,15 +13,21 @@ import IconButton from '@/components/ui/IconButton'
 export const Drawer = RadixDialog.Root
 export const DrawerTrigger = RadixDialog.Trigger
 
-interface DrawerContentProps {
+interface DrawerContentProps extends Omit<ComponentProps<typeof RadixDialog.Content>, 'title'> {
   children: ReactNode
   title: string
   hideTitle?: boolean
   side?: 'left' | 'right'
-  className?: string
 }
 
-export function DrawerContent({ children, title, hideTitle, side = 'right', className }: DrawerContentProps) {
+export function DrawerContent({
+  children,
+  title,
+  hideTitle,
+  side = 'right',
+  className,
+  ...props
+}: DrawerContentProps) {
   return (
     <RadixDialog.Portal>
       <RadixDialog.Overlay className="fixed inset-0 z-overlay bg-ink/50" />
@@ -31,6 +37,7 @@ export function DrawerContent({ children, title, hideTitle, side = 'right', clas
           side === 'right' ? 'right-0' : 'left-0',
           className,
         )}
+        {...props}
       >
         <RadixDialog.Title className={clsx('font-serif text-xl font-medium', hideTitle && 'sr-only')}>
           {title}
