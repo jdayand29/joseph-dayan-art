@@ -10,6 +10,7 @@ import {
 } from '@/lib/repositories/artworkRepository'
 import SpecTable from '@/components/artwork/SpecTable'
 import ArtworkLightbox from '@/components/artwork/ArtworkLightbox'
+import Container from '@/components/ui/Container'
 import { formatPrice } from '@/utils/formatPrice'
 
 interface PageProps {
@@ -34,7 +35,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     openGraph: {
       title,
       description,
-      images: [{ url: artwork.image }],
+      images: [{ url: artwork.images[0].src }],
     },
   }
 }
@@ -53,9 +54,9 @@ export default async function ArtworkPage({ params }: PageProps) {
     : undefined
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-14">
+    <Container width="detail" className="py-14">
       <div className="grid gap-8 md:grid-cols-2">
-        <ArtworkLightbox src={artwork.image} alt={artwork.title} />
+        <ArtworkLightbox src={artwork.images[0].src} alt={artwork.title} />
 
         <div>
           <Link href="/sobre" className="mb-4 flex items-center gap-3">
@@ -91,7 +92,7 @@ export default async function ArtworkPage({ params }: PageProps) {
           <SpecTable artwork={artwork} />
 
           <div className="rounded-3xl bg-white p-6 shadow-card">
-            {artwork.sold ? (
+            {artwork.status === 'sold' ? (
               <p className="rounded-full bg-ink/5 px-4 py-2 text-center text-sm text-ink/60">
                 Esta obra ya fue vendida
               </p>
@@ -114,6 +115,6 @@ export default async function ArtworkPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </div>
+    </Container>
   )
 }

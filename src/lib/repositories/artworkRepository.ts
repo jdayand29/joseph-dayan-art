@@ -6,8 +6,31 @@
 // Regla de la Fase C: nunca se devuelve la referencia interna de un array
 // (ReadonlyArray + copia defensiva) ni de un objeto individual (spread) —
 // ningún consumidor puede mutar los datos "reales" por accidente.
-import { artists, artworks, collections } from '@/data/artworks'
-import type { Artist, Artwork, Collection } from '@/types/artwork'
+import { artists, artworks as rawArtworks, collections } from '@/data/artworks'
+import metadataManifest from '@/data/artwork-image-metadata.generated.json'
+import type { Artist, Artwork, ArtworkImage, Collection } from '@/types/artwork'
+
+// Resuelve `images: string[]` (rutas crudas de data/artworks.ts) a
+// `ArtworkImage[]` (con width/height reales) usando el manifest generado por
+// Fase I.0 — una única vez al cargar este módulo, no en cada llamada. Ningún
+// componente ni página conoce esta lógica; solo ven `Artwork.images` ya
+// resuelto (Fase I.1, decisión congelada).
+const imageMetadata = metadataManifest as Record<string, { width: number; height: number }>
+
+function resolveImages(paths: string[]): ArtworkImage[] {
+  return paths.map((src) => {
+    const dimensions = imageMetadata[src]
+    if (!dimensions) {
+      throw new Error(`Falta metadata de imagen para ${src}. Corre: npm run images:generate`)
+    }
+    return { src, ...dimensions }
+  })
+}
+
+const artworks: ReadonlyArray<Artwork> = rawArtworks.map((raw) => ({
+  ...raw,
+  images: resolveImages(raw.images),
+}))
 
 export function getAllArtworks(): ReadonlyArray<Artwork> {
   return [...artworks]
@@ -33,7 +56,7 @@ export function getCollectionBySlug(slug: string): Collection | undefined {
   // portada dedicada para la serie — mientras tanto, se usa la primera obra
   // de la colección como fallback razonable (no inventado: es una imagen real
   // ya asociada a esa colección).
-  const fallbackImage = artworks.find((w) => w.collectionId === collection.id)?.image ?? null
+  const fallbackImage = artworks.find((w) => w.collectionId === collection.id)?.images[0]?.src ?? null
 
   return {
     ...collection,

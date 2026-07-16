@@ -1,27 +1,32 @@
 import Link from 'next/link'
-import Image from 'next/image'
 import { formatPrice } from '@/utils/formatPrice'
 import Badge from '@/components/ui/Badge'
+import Avatar from '@/components/ui/Avatar'
+import Media from '@/components/ui/Media'
+import { Reveal } from '@/components/ui/Reveal'
 import type { Artwork, Artist } from '@/types/artwork'
 
 interface ArtworkCardProps {
-  artwork: Pick<Artwork, 'slug' | 'title' | 'image' | 'style' | 'price' | 'sold'>
+  artwork: Pick<Artwork, 'slug' | 'title' | 'images' | 'style' | 'price' | 'status'>
   artist: Pick<Artist, 'name' | 'avatar' | 'flag'>
 }
 
 export default function ArtworkCard({ artwork, artist }: ArtworkCardProps) {
+  const [image] = artwork.images
+
   return (
-    <div className="mb-10 break-inside-avoid">
+    <Reveal as="div" className="mb-10 break-inside-avoid">
       <Link href={`/obra/${artwork.slug}`} className="group block">
-        <div className="relative overflow-hidden rounded-xl">
-          <Image
-            src={artwork.image}
+        <div className="relative overflow-hidden rounded-image">
+          <Media
+            src={image.src}
             alt={artwork.title}
-            width={800}
-            height={800}
-            className="w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            width={image.width}
+            height={image.height}
+            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="w-full h-auto transition-transform duration-300 group-hover:scale-[1.02]"
           />
-          {artwork.sold && (
+          {artwork.status === 'sold' && (
             <span className="absolute right-3 top-3">
               <Badge variant="light">Vendida</Badge>
             </span>
@@ -30,13 +35,7 @@ export default function ArtworkCard({ artwork, artist }: ArtworkCardProps) {
           {/* Artista y precio: solo se revelan al pasar el mouse, para que la imagen domine */}
           <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent p-3 pt-8 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
             <div className="flex items-center gap-1.5">
-              <Image
-                src={artist.avatar}
-                alt={artist.name}
-                width={20}
-                height={20}
-                className="h-5 w-5 rounded-full object-cover"
-              />
+              <Avatar src={artist.avatar} alt={artist.name} size="sm" />
               <span className="text-xs text-white/90">{artist.name}</span>
               <span className="text-xs">{artist.flag}</span>
             </div>
@@ -53,6 +52,6 @@ export default function ArtworkCard({ artwork, artist }: ArtworkCardProps) {
         </Link>
         <p className="mt-0.5 text-xs text-ink/40">{artwork.style}</p>
       </div>
-    </div>
+    </Reveal>
   )
 }

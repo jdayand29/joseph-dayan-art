@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import ArtworkCard from '@/components/artwork/ArtworkCard'
 import MasonryGrid from '@/components/ui/MasonryGrid'
+import Container from '@/components/ui/Container'
 import type { Artist, Artwork } from '@/types/artwork'
 
 interface ArtworkCatalogProps {
@@ -19,7 +20,7 @@ export default function ArtworkCatalog({ artworks, artist, styles }: ArtworkCata
     activeStyle === 'Todos' ? artworks : artworks.filter((artwork) => artwork.style === activeStyle)
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-14">
+    <Container className="py-14">
       <h1 className="mb-8 font-serif text-3xl font-semibold sm:text-4xl">Obra</h1>
 
       <div className="mb-8 flex gap-2 overflow-x-auto pb-2">
@@ -47,6 +48,6 @@ export default function ArtworkCatalog({ artworks, artist, styles }: ArtworkCata
           ))}
         </MasonryGrid>
       )}
-    </div>
+    </Container>
   )
 }

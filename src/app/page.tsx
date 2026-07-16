@@ -31,7 +31,7 @@ export default function Home() {
       {/* Hero: una sola obra */}
       <section className="relative">
         <Image
-          src={featured.image}
+          src={featured.images[0].src}
           alt={featured.title}
           width={1600}
           height={1000}

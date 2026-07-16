@@ -18,6 +18,13 @@ const CATALOG_MIGRATION_DATE = '2026-07-15T00:00:00.000Z'
 
 import type { Artist, Artwork, Collection } from '@/types/artwork'
 
+// Forma cruda/autoral — únicamente este archivo la usa. No se exporta: el
+// repositorio (artworkRepository.ts) importa el valor `artworks` de abajo, no
+// este tipo por nombre, y TS infiere su forma automáticamente. Evita que un
+// segundo tipo de dominio "crudo" pueda importarse por error desde otro
+// archivo (Fase I.1) — `Artwork` sigue siendo el único tipo público.
+type RawArtwork = Omit<Artwork, 'images'> & { images: string[] }
+
 export const artists: Artist[] = [
   {
     id: 'a9',
@@ -41,12 +48,11 @@ export const artists: Artist[] = [
   },
 ]
 
-export const artworks: Artwork[] = [
+export const artworks: RawArtwork[] = [
   {
     id: 'w15',
     artistId: 'a9',
     title: 'Nebulosa Dorada',
-    image: '/artists/joseph-dayan/nebulosa-dorada.jpg',
     images: ['/artists/joseph-dayan/nebulosa-dorada.jpg'],
     medium: 'Acrílico sobre lienzo',
     style: 'Abstracto',
@@ -58,7 +64,6 @@ export const artworks: Artwork[] = [
     slug: 'nebulosa-dorada',
     featured: true,
     status: 'available',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -68,7 +73,6 @@ export const artworks: Artwork[] = [
     id: 'w16',
     artistId: 'a9',
     title: 'Siluetas en Armonía',
-    image: '/artists/joseph-dayan/siluetas-en-armonia.jpg',
     images: ['/artists/joseph-dayan/siluetas-en-armonia.jpg'],
     medium: 'Acrílico sobre lienzo',
     style: 'Contemporáneo',
@@ -79,7 +83,6 @@ export const artworks: Artwork[] = [
     slug: 'siluetas-en-armonia',
     featured: false,
     status: 'available',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -89,7 +92,6 @@ export const artworks: Artwork[] = [
     id: 'w17',
     artistId: 'a9',
     title: 'Corazón y Razón',
-    image: '/artists/joseph-dayan/corazon-y-razon.jpg',
     images: ['/artists/joseph-dayan/corazon-y-razon.jpg'],
     medium: 'Acrílico sobre lienzo',
     style: 'Surrealismo',
@@ -101,7 +103,6 @@ export const artworks: Artwork[] = [
     slug: 'corazon-y-razon',
     featured: false,
     status: 'available',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -111,7 +112,6 @@ export const artworks: Artwork[] = [
     id: 'w18',
     artistId: 'a9',
     title: 'Alcanzando el Horizonte',
-    image: '/artists/joseph-dayan/alcanzando-el-horizonte.jpg',
     images: ['/artists/joseph-dayan/alcanzando-el-horizonte.jpg'],
     medium: 'Acrílico sobre lienzo, técnica de espátula',
     style: 'Surrealismo',
@@ -122,7 +122,6 @@ export const artworks: Artwork[] = [
     slug: 'alcanzando-el-horizonte',
     featured: false,
     status: 'unavailable',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -132,7 +131,6 @@ export const artworks: Artwork[] = [
     id: 'w19',
     artistId: 'a9',
     title: 'El Pabellón Escondido',
-    image: '/artists/joseph-dayan/el-pabellon-escondido.jpg',
     images: ['/artists/joseph-dayan/el-pabellon-escondido.jpg'],
     medium: 'Acrílico sobre lienzo',
     style: 'Realismo',
@@ -143,7 +141,6 @@ export const artworks: Artwork[] = [
     slug: 'el-pabellon-escondido',
     featured: false,
     status: 'available',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -153,7 +150,6 @@ export const artworks: Artwork[] = [
     id: 'w20',
     artistId: 'a9',
     title: 'Barco de Papel',
-    image: '/artists/joseph-dayan/barco-de-papel.jpg',
     images: ['/artists/joseph-dayan/barco-de-papel.jpg'],
     medium: 'Acrílico sobre lienzo',
     style: 'Minimalismo',
@@ -164,7 +160,6 @@ export const artworks: Artwork[] = [
     slug: 'barco-de-papel',
     featured: false,
     status: 'available',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -174,7 +169,6 @@ export const artworks: Artwork[] = [
     id: 'w21',
     artistId: 'a9',
     title: 'El Filo del Tiempo',
-    image: '/artists/joseph-dayan/el-filo-del-tiempo.jpg',
     images: ['/artists/joseph-dayan/el-filo-del-tiempo.jpg'],
     medium: 'Acrílico y hoja de oro sobre lienzo',
     style: 'Arte Conceptual',
@@ -185,7 +179,6 @@ export const artworks: Artwork[] = [
     slug: 'el-filo-del-tiempo',
     featured: false,
     status: 'unavailable',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,
@@ -195,7 +188,6 @@ export const artworks: Artwork[] = [
     id: 'w22',
     artistId: 'a9',
     title: 'Danza de Koi',
-    image: '/artists/joseph-dayan/danza-de-koi.jpg',
     images: ['/artists/joseph-dayan/danza-de-koi.jpg'],
     medium: 'Acrílico con espátula sobre lienzo',
     style: 'Expresionismo',
@@ -206,7 +198,6 @@ export const artworks: Artwork[] = [
     slug: 'danza-de-koi',
     featured: false,
     status: 'available',
-    sold: false,
     description: null,
     shortDescription: null,
     createdAt: CATALOG_MIGRATION_DATE,

@@ -6,7 +6,7 @@ interface SpecTableProps {
 
 export default function SpecTable({ artwork }: SpecTableProps) {
   return (
-    <dl className="mb-5 grid grid-cols-2 gap-y-2 rounded-2xl bg-white p-5 text-sm shadow-card">
+    <dl className="mb-5 grid grid-cols-2 gap-y-2 rounded-field bg-white p-5 text-sm shadow-card">
       <dt className="text-ink/50">Técnica</dt>
       <dd className="text-right font-medium">{artwork.medium}</dd>
       <dt className="text-ink/50">Tamaño</dt>

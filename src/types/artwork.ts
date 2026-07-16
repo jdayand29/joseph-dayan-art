@@ -36,24 +36,27 @@ export interface Artist {
 
 export type ArtworkStatus = 'available' | 'sold' | 'unavailable'
 
+// Fuente de verdad del aspect ratio real de cada obra — width/height medidos
+// del archivo (Fase I.0, data/artwork-image-metadata.generated.json), nunca
+// derivados de `size` (medida física del lienzo; no coincide con el ratio
+// real de la foto). El repositorio resuelve `src` (ruta cruda en
+// data/artworks.ts) a este tipo una única vez al cargar el módulo.
+export interface ArtworkImage {
+  src: string
+  width: number
+  height: number
+}
+
 export interface Artwork {
   id: string
   artistId: string
   title: string
-  /** @deprecated usar `images[0]` — se conserva por compatibilidad con
-   * componentes ya migrados (ArtworkCard, ArtworkLightbox, etc.); ambos deben
-   * apuntar a la misma imagen hasta que esos componentes se actualicen
-   * (Sistema de Diseño, Fase I). */
-  image: string
   medium: string
   style: string
   size: string
   year: number
   price?: number
   collectionId?: string
-  /** @deprecated usar `status === 'sold'` — se mantiene sincronizado a mano
-   * mientras ArtworkCard/ArtworkDetail (Fase I) no migren a `status`. */
-  sold?: boolean
   // --- Campos nuevos (Fase C) ---
   slug: string
   /** Debe haber como máximo una obra con `featured: true` — la usa
@@ -67,9 +70,8 @@ export interface Artwork {
   description: string | null
   /** Resumen de una línea para tarjetas/listados. Pendiente. */
   shortDescription: string | null
-  /** Todas las imágenes de la obra; hoy siempre `[image]` (una sola foto por
-   * pieza). Ver nota de `image` sobre por qué ambos campos coexisten. */
-  images: string[]
+  /** Todas las imágenes de la obra; hoy siempre una sola foto por pieza. */
+  images: ArtworkImage[]
   seo?: SeoOverride
   /** Todas las obras se han asumido en USD implícitamente (símbolo `$` en
    * formatPrice) — este campo lo hace explícito en vez de asumido. */
