@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import ArtworkCard from '@/components/artwork/ArtworkCard'
+import MasonryGrid from '@/components/ui/MasonryGrid'
 import type { Artist, Artwork } from '@/types/artwork'
 
 interface ArtworkCatalogProps {
@@ -40,11 +41,11 @@ export default function ArtworkCatalog({ artworks, artist, styles }: ArtworkCata
       {filtered.length === 0 ? (
         <p className="text-ink/50">No hay obras con este estilo todavía.</p>
       ) : (
-        <div className="columns-1 gap-8 sm:columns-2 lg:columns-3 xl:columns-4">
+        <MasonryGrid columns={{ sm: 2, lg: 3, xl: 4 }}>
           {filtered.map((artwork) => (
             <ArtworkCard key={artwork.id} artwork={artwork} artist={artist} />
           ))}
-        </div>
+        </MasonryGrid>
       )}
     </div>
   )

@@ -9,6 +9,7 @@ import {
 } from '@/lib/repositories/artworkRepository'
 import ArtworkCard from '@/components/artwork/ArtworkCard'
 import CollectionCard from '@/components/artwork/CollectionCard'
+import MasonryGrid from '@/components/ui/MasonryGrid'
 
 export const metadata: Metadata = {
   title: 'Joseph Dayan',
@@ -50,11 +51,11 @@ export default function Home() {
       {/* Obra destacada */}
       <section className="mx-auto max-w-6xl px-6 py-8">
         <h2 className="mb-6 text-sm font-semibold uppercase tracking-wide text-ink/50">Obra destacada</h2>
-        <div className="columns-1 gap-8 sm:columns-2 lg:columns-4">
+        <MasonryGrid columns={{ sm: 2, lg: 4 }}>
           {featuredWorks.map((artwork) => (
             <ArtworkCard key={artwork.id} artwork={artwork} artist={artist} />
           ))}
-        </div>
+        </MasonryGrid>
         <Link href="/obra" className="mt-2 inline-block text-sm font-medium underline underline-offset-2">
           Ver toda la obra →
         </Link>
