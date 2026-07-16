@@ -70,19 +70,19 @@ src/
   components/
     ui/           primitivos sin conocimiento de dominio
     layout/       esqueleto de página (header, footer, container)
-    navigation/   cómo te mueves por el sitio (nav links, futuro menú móvil, breadcrumb)
+    navigation/   cómo te mueves por el sitio (NavLink, MobileMenu — Fase H; futuro Breadcrumb en I.2)
     artwork/      dominio obra/colección
     forms/        formularios de negocio
     feedback/     estados del sistema (toast, empty state, skeleton) — aún vacía
     sections/     bloques de página compuestos — aún vacía
-    providers/    providers de React — aún vacía
+    providers/    providers de React (ToastProvider, Fase E)
   hooks/          hooks compartidos
   lib/
     repositories/ única puerta de acceso a datos
     services/     lógica de negocio con efectos secundarios — aún vacía
   styles/
     tokens/       design tokens tipados
-    motion/       presets de Framer Motion — aún vacía
+    motion/       variants/transitions/interactions/stagger de Motion (Fase F)
   data/           fuente de datos cruda
   types/          tipos de dominio compartidos
   utils/          funciones puras sin estado
@@ -120,6 +120,12 @@ Una carpeta "aún vacía" existe en la estructura porque su necesidad ya está j
   - Se investigaron y descartaron dos alternativas antes de esta, con evidencia: la `<ViewTransition>` nativa de Next.js/React (`experimental.viewTransition`, requiere una flag experimental — no apta para un sitio pensado a 10-20 años); y `LazyMotion`+`m.div`+`useReducedMotion` (funciona, pero agrega un límite cliente, una dependencia de bundle y una rama condicional para lograr únicamente un fade de opacidad que CSS puro ya resuelve).
   - Consecuencia: `transitions.pageTransition` (el preset de Motion definido en Fase F para este momento) sigue sin consumidor real — correcto, ya que ningún caso de uso actual necesita física de springs/gestos para esto.
   - Fade de entrada únicamente, sin crossfade de salida — un crossfade real exige `AnimatePresence` coordinado entre `layout.tsx` (no remonta) y `template.tsx` (sí remonta), con casos borde conocidos en Next.js App Router; el fade de entrada logra la sensación de "transición cuidada" sin esa fragilidad.
+
+## Navigation System
+
+- **`NavLink`** (`components/navigation/`) es el único lugar que decide si una ruta está activa (`pathname === href || pathname.startsWith(href + '/')`) y aplica `aria-current="page"` — corrige un hueco de accesibilidad real (el link activo antes solo se distinguía visualmente, sin atributo ARIA). Consumido por el nav de escritorio de `SiteHeader` y por `MobileMenu`; el estilo visual (`className`/`activeClassName`) queda en manos de quien lo usa, ya que desktop (píldoras horizontales) y móvil (lista vertical) necesitan aspectos distintos sobre la misma lógica.
+- **`MobileMenu`** (`components/navigation/`) es el primer consumidor real de `Drawer` (Fase E/F, construido explícitamente para este momento). Mantiene `open`/`onOpenChange` controlado — no por costumbre, sino porque es la única forma de cerrar el Drawer automáticamente cuando el usuario toca un link de navegación (Radix no lo hace por sí solo). El botón trigger es `md:hidden`; el `<nav>` de escritorio en `SiteHeader` es `hidden md:flex` — ambos gobernados por el mismo breakpoint (`md`, 768px), verificado que no se solapan ni dejan un hueco en la transición.
+- `SiteHeader` usa `Container width="content"` en vez de `mx-auto max-w-6xl px-6` propio (Fase H) — mismo criterio que Fase G aplicó a `ArtworkCatalog`/Home.
 
 ## Toast Pattern
 
