@@ -11,6 +11,7 @@ import {
 import SpecTable from '@/components/artwork/SpecTable'
 import ArtworkLightbox from '@/components/artwork/ArtworkLightbox'
 import Container from '@/components/ui/Container'
+import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatPrice } from '@/utils/formatPrice'
 
 interface PageProps {
@@ -55,8 +56,21 @@ export default async function ArtworkPage({ params }: PageProps) {
 
   return (
     <Container width="detail" className="py-14">
-      <div className="grid gap-8 md:grid-cols-2">
-        <ArtworkLightbox src={artwork.images[0].src} alt={artwork.title} />
+      <Breadcrumb
+        items={[
+          { label: 'Obra', href: '/obra' },
+          ...(collection ? [{ label: collection.name, href: `/coleccion/${collection.slug}` }] : []),
+          { label: artwork.title },
+        ]}
+      />
+
+      <div className="mt-4 grid gap-8 md:grid-cols-2">
+        <ArtworkLightbox
+          src={artwork.images[0].src}
+          alt={artwork.title}
+          width={artwork.images[0].width}
+          height={artwork.images[0].height}
+        />
 
         <div>
           <Link href="/sobre" className="mb-4 flex items-center gap-3">

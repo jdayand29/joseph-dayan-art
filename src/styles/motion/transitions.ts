@@ -23,7 +23,9 @@ export const transitions = {
     duration: duration.base / 1000,
     ease: easing.standard,
   },
-  // Placeholder — sin consumidor en esta fase. Fase I lo usa junto a un
-  // layoutId compartido en el rediseño de ArtworkLightbox.
+  // Consumido por ArtworkLightbox (Fase I.2) junto a un layoutId compartido
+  // entre el thumbnail y la imagen a pantalla completa — único consumidor de
+  // domMax del proyecto (layout/layoutId no está soportado por domAnimation,
+  // usado por Reveal/Stagger).
   lightboxTransition: spring.smooth,
 } as const satisfies Record<string, Transition>
