@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: siteName,
   description: siteDescription,
+  icons: { icon: '/favicon.svg' },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
