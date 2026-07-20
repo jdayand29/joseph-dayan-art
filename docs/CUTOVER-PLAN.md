@@ -21,7 +21,14 @@ producción). Progreso:
   `"buildCommand": "npm run build:next"`, sin `rewrites` (el catch-all a
   `/index.html` habría roto el enrutamiento de Next.js). JSON validado,
   `tsc --noEmit` limpio.
-- [ ] PFV-1/PFV-2 — instalación limpia + build limpio equivalente a Vercel.
+- [x] **PFV-1/PFV-2 — instalación limpia + build limpio.** `rm -rf
+  node_modules && npm ci` (exit 0, mismo mecanismo de instalación que
+  Vercel usa a partir del lockfile) seguido de `npm run build:next`:
+  `images:check` (`sharp`) OK, `next build` OK (TypeScript incluido, 21
+  páginas generadas), y `npm run build` (Vite) también OK sobre el mismo
+  `node_modules` fresco. `sharp` deja de ser un supuesto: funciona en una
+  instalación limpia, no solo sobre el `node_modules` incremental usado en
+  cada fase anterior.
 - [ ] PFV-7 — `NEXT_PUBLIC_SITE_URL` en Vercel (entorno Preview).
 - [ ] PFV-4 — push de la rama, Preview Deployment, verificación funcional completa.
 
@@ -176,12 +183,18 @@ Cada bloque se completa y valida antes de continuar al siguiente.
 - **Documentado:** esta sección + apartado de progreso arriba.
 - **Commit:** siguiente en este mismo turno.
 
-### Bloque 4 — Instalación y build limpios (PFV-1/PFV-2)
+### Bloque 4 — Instalación y build limpios (PFV-1/PFV-2) ✅ Completo
 
-- **A implementar:** nada de código — solo ejecución: `rm -rf node_modules
-  && npm ci`, luego `npm run build:next`.
-- **A verificar:** instalación sin errores; build termina en verde,
-  incluyendo `images:check` (`prebuild:next`) sin advertencias de `sharp`.
+- **Ejecutado:** `rm -rf node_modules && npm ci` (exit 0) → `npm run
+  build:next` (exit 0, `images:check` OK, `next build` OK, TypeScript
+  incluido) → `npm run build` (Vite, exit 0, mismo `node_modules`).
+- **Verificado:** ningún error en ninguno de los tres; `sharp` funciona
+  correctamente en una instalación limpia (no solo sobre el `node_modules`
+  incremental de fases anteriores).
+- **Documentado:** esta sección + apartado de progreso arriba.
+- **Commit:** este bloque no modifica ningún archivo de código (es
+  puramente verificación) — solo se commitea la actualización de este
+  documento.
 
 ### Bloque 5 — `NEXT_PUBLIC_SITE_URL` en Vercel (Preview)
 
