@@ -311,6 +311,141 @@ separada (ver checklist siguiente, fuera de alcance de esta fase).
 
 ---
 
+## 5. Orden exacto de ejecución del cutover real a `main` (fase posterior, requiere aprobación explícita)
+
+Punto de entrada: los 7 bloques de la sección 4 en verde (confirmado) — lo
+que sigue ya no es "probar por primera vez", es replicar en `main` una
+configuración ya validada en un Preview Deployment real.
+
+### Paso 1 — Confirmar `NEXT_PUBLIC_SITE_URL` en Production
+
+- **Qué cambia:** se agrega/confirma la variable de entorno
+  `NEXT_PUBLIC_SITE_URL=https://art-marketplace-ruddy.vercel.app` para el
+  entorno **Production** (ya existe en Preview desde el Bloque 5).
+- **Por qué:** Next.js incrusta las variables `NEXT_PUBLIC_*` en tiempo de
+  build, no en runtime — debe existir antes del primer build de Production,
+  o quedaría horneado el fallback incorrecto.
+- **Riesgo:** ninguno — agregar una variable no afecta el deployment
+  actualmente en producción (sigue siendo Vite, que no la usa).
+- **Cómo verificar:** `vercel env ls` debe mostrar `NEXT_PUBLIC_SITE_URL`
+  con `Production` en su lista de entornos.
+
+### Paso 2 — Reconfirmar Deployment ID de rollback y aliases activos
+
+- **Qué cambia:** nada — es una captura de evidencia fresca, inmediatamente
+  antes de tocar `main`.
+- **Por qué:** el deployment ID de Vite "bueno conocido" y los alias activos
+  pudieron cambiar desde la auditoría original; PFV-5/PFV-6 exigen
+  reconfirmarlos el mismo día, no confiar en datos de sesiones anteriores.
+- **Riesgo:** ninguno (solo lectura).
+- **Cómo verificar:** `vercel ls joseph-dayan-art` (deployment de Vite en
+  Production, estado `Ready`, anotar su URL/ID) y `vercel alias ls`
+  (confirmar los alias vigentes).
+
+### Paso 3 — Replicar en `main` los cambios ya validados en `cutover-preflight`
+
+- **Qué cambia:** merge o fast-forward de `cutover-preflight` sobre `main`
+  (mismos cambios ya probados en el Preview: `layout.tsx` con favicon,
+  borrado de `api/subscribe.js`/`api/chat.js`, `vercel.json` actualizado).
+- **Por qué:** ya se verificaron en un Preview Deployment real — este paso
+  es una réplica, no un experimento.
+- **Riesgo:** bajo — el único riesgo real ya se cerró en el Preview.
+- **Cómo verificar:** `git diff main cutover-preflight` antes del merge para
+  confirmar exactamente qué se va a aplicar; `npx tsc --noEmit` limpio
+  después.
+
+### Paso 4 — Push a `main`
+
+- **Qué cambia:** el estado de `main` en GitHub.
+- **Por qué:** Vercel está conectado a `main` vía su integración de Git —
+  un push dispara automáticamente un nuevo deployment de Production.
+- **Riesgo:** punto de no-retorno operativo — el código previo (Vite) sigue
+  sirviendo tráfico sin interrupción hasta que el build nuevo esté listo y
+  se promueva (atomicidad estándar de Vercel).
+- **Cómo verificar:** `git log origin/main` refleja el commit nuevo; nuevo
+  deployment visible en `vercel ls joseph-dayan-art` con `Environment:
+  Production`.
+
+### Paso 5 — Monitorear el build en Vercel
+
+- **Qué cambia:** nada todavía en el alias público — el nuevo deployment se
+  construye de forma aislada.
+- **Por qué:** último punto de detección antes de que algo llegue al alias
+  de producción.
+- **Riesgo:** que el build falle de una forma no anticipada por el Preview
+  (poco probable, misma configuración exacta, pero no descartable al 100%).
+- **Cómo verificar:** `vercel inspect <url> --logs` → estado `Ready`; log
+  revisado explícitamente por `Detected Next.js version`, `Running "npm run
+  build:next"`, `images:check OK`.
+
+### Paso 6 — Verificación funcional contra la URL del deployment (antes del alias)
+
+- **Qué cambia:** nada en el alias público todavía — se verifica primero la
+  URL única del deployment de Production.
+- **Por qué:** "build exitoso" no garantiza "funcionalmente correcto".
+- **Riesgo:** que el sitio "funcione" a nivel HTTP pero tenga un defecto
+  funcional.
+- **Cómo verificar (misma checklist ya ejecutada contra el Preview en el
+  Bloque 7):** rutas en `200`, ruta legacy en `404`, `POST /api/subscribe`
+  en `200` con el mensaje de Next.js, favicon presente, metadata/OG
+  correctos, imagen optimizada en `200`, Lightbox con foco atrapado/Escape,
+  navegación completa, cero errores de consola.
+
+### Paso 7 — Confirmar que los 3 alias de producción apuntan al nuevo deployment
+
+- **Qué cambia:** el tráfico real de los 3 alias.
+- **Por qué:** es el paso que efectivamente reemplaza "Artora" por "Joseph
+  Dayan Art" para cualquiera que visite esas URLs.
+- **Riesgo:** si el Paso 6 no se hizo con cuidado, este es el momento en que
+  un defecto no detectado se vuelve visible públicamente.
+- **Cómo verificar:** `curl` contra **cada uno de los 3 alias**
+  individualmente — cada uno debe devolver el mismo HTML verificado en el
+  Paso 6.
+
+---
+
+## 6. Plan de rollback del cutover real (dos niveles, independientes)
+
+### Nivel 1 — Rollback operativo inmediato (segundos, no requiere tocar Git)
+
+Si el Paso 6 o el Paso 7 revelan un problema **después** de que Vercel ya
+promovió el nuevo deployment a producción:
+
+```
+vercel rollback <url-o-deployment-id-del-deployment-anterior-de-Vite>
+```
+
+El deployment ID a usar es el confirmado en el Paso 2 de este mismo turno
+(no uno recordado de una sesión anterior). Este comando reasigna el alias
+de producción de vuelta al deployment anterior (Vite) — operación de
+Vercel, no de código; no requiere revertir el commit ni esperar un build
+nuevo.
+
+Verificación post-rollback: `curl` contra los 3 alias — deben volver a
+mostrar el shell de Vite.
+
+### Nivel 2 — Rollback de código
+
+```
+git revert <hash-del-commit-del-Paso-4>
+git push origin main
+```
+
+Restaura `vercel.json`, `api/subscribe.js`, `api/chat.js` y el fix de
+favicon a su estado anterior en `main` — para que el próximo push no vuelva
+a construir la configuración problemática. Se ejecuta *después* del
+rollback de Nivel 1 (que ya resolvió lo urgente), no en su lugar.
+
+**Regla explícita de esta ejecución:** si cualquier validación crítica del
+Paso 6/7 falla, se ejecuta el rollback de Nivel 1 **inmediatamente**, antes
+de intentar diagnosticar o corregir el código — el diagnóstico ocurre
+después, con producción ya restaurada.
+
+**Si el build del Paso 5 falla:** no hace falta rollback — producción nunca
+dejó el deployment anterior.
+
+---
+
 ## 7. Riesgos (de esta fase — Preview únicamente)
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
