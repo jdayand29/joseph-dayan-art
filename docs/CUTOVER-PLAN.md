@@ -312,11 +312,29 @@ separada (ver checklist siguiente, fuera de alcance de esta fase).
       `joseph-dayan-art-josephd.vercel.app`,
       `joseph-dayan-art-git-main-josephd.vercel.app` — los 3 apuntando hoy
       al deployment de rollback de arriba.
-- [ ] Replicar los cambios de esta rama en `main`.
-- [ ] Commit + push a `main`.
-- [ ] Monitorear build de Production.
-- [ ] Verificar los 3 alias de producción.
-- [x] Aprobación explícita del usuario recibida — se procede con los pasos siguientes.
+- [x] Replicado en `main` (fast-forward desde `cutover-preflight`, commit `6a6ac86`).
+- [x] Push a `main` completado.
+- [x] Build de Production monitoreado hasta `Ready` (deployment
+      `https://joseph-dayan-901em1pia-josephd.vercel.app`) — log idéntico al
+      Preview: Next.js detectado, `npm run build:next`, `images:check OK`.
+- [x] Verificación funcional completa contra la URL del deployment y luego
+      contra el alias real — ambas idénticas, incluyendo Lightbox
+      (Playwright: foco atrapado, `Escape`) y cero errores de consola.
+- [x] Los 3 alias de producción confirmados apuntando al nuevo deployment
+      (`vercel alias ls`).
+- [x] Aprobación explícita del usuario recibida — cutover ejecutado.
+
+## CUTOVER COMPLETO — Joseph Dayan Art es ahora el sitio en producción
+
+- **Commit desplegado:** `6a6ac86` (`main`).
+- **Deployment ID:** `https://joseph-dayan-901em1pia-josephd.vercel.app`.
+- **Alias de producción:** `art-marketplace-ruddy.vercel.app`,
+  `joseph-dayan-art-josephd.vercel.app`,
+  `joseph-dayan-art-git-main-josephd.vercel.app` — los 3 confirmados.
+- **Rollback:** no fue necesario. Deployment de Vite conservado
+  (`https://joseph-dayan-6j1c9khmb-josephd.vercel.app`) por si se requiere
+  en el futuro, aunque ya no está asignado a ningún alias.
+- **Rama `cutover-preflight`:** cumplió su propósito, puede eliminarse.
 
 ---
 
