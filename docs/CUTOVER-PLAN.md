@@ -302,12 +302,21 @@ separada (ver checklist siguiente, fuera de alcance de esta fase).
 
 ### Checklist que queda para una fase posterior (cutover real a producción — NO parte de esta fase)
 
-- [ ] `NEXT_PUBLIC_SITE_URL` en Production.
+- [x] `NEXT_PUBLIC_SITE_URL` en Production — agregada (`vercel env ls`
+      confirma `Production` además de `Preview`, ambas apuntando a
+      `https://art-marketplace-ruddy.vercel.app`).
+- [x] Deployment ID de rollback reconfirmado:
+      `https://joseph-dayan-6j1c9khmb-josephd.vercel.app` (Vite, `Ready`,
+      Production, el más reciente).
+- [x] Alias activos reconfirmados: `art-marketplace-ruddy.vercel.app`,
+      `joseph-dayan-art-josephd.vercel.app`,
+      `joseph-dayan-art-git-main-josephd.vercel.app` — los 3 apuntando hoy
+      al deployment de rollback de arriba.
 - [ ] Replicar los cambios de esta rama en `main`.
 - [ ] Commit + push a `main`.
 - [ ] Monitorear build de Production.
 - [ ] Verificar los 3 alias de producción.
-- [ ] Aprobación explícita del usuario antes de cualquiera de estos pasos.
+- [x] Aprobación explícita del usuario recibida — se procede con los pasos siguientes.
 
 ---
 
