@@ -36,7 +36,28 @@ producción). Progreso:
   Production). Se agrega antes del Preview Deployment (Bloque 6) para que
   ese build ya lea el valor correcto en `metadataBase`, no el fallback
   inexistente.
-- [ ] PFV-4 — push de la rama, Preview Deployment, verificación funcional completa.
+- [x] **PFV-4 — Preview Deployment real, verificado en su totalidad.** Rama
+  `cutover-preflight` pusheada (`git push -u origin cutover-preflight`) —
+  Vercel generó automáticamente
+  `https://joseph-dayan-bfivf43pm-josephd.vercel.app` (Environment:
+  Preview, Status: Ready). Log de build confirma explícitamente:
+  `Detected Next.js version: 16.2.10`, `Running "npm run build:next"`
+  (no cae a `vite build`), `images:check OK` (Linux real de Vercel, no
+  solo macOS), TypeScript incluido en el build, 21 páginas generadas.
+  Verificación funcional completa contra esa URL: las 9 rutas → `200`;
+  ruta legacy `/explorar` → `404`; `POST /api/subscribe` → `200`
+  `{"ok":true}` (resuelto por Next.js, `api/subscribe.js` ya no existe);
+  favicon con `<link rel="icon" href="/favicon.svg">` presente; Open
+  Graph correcto (`og:image` resuelve a
+  `https://art-marketplace-ruddy.vercel.app/...`, confirma que
+  `NEXT_PUBLIC_SITE_URL` de Preview se leyó bien); imagen optimizada
+  (`/_next/image?...`) → `200` con contenido binario real; Lightbox
+  probado con Playwright contra esta URL real (no `next dev`): abre,
+  atrapa foco en "Cerrar", `aria-hidden` aplicado al resto del árbol,
+  `Escape` cierra y devuelve el foco al trigger; `MobileMenu` probado en
+  viewport 375px: abre, lista de navegación completa, botón "Cerrar"
+  presente; **cero errores y cero warnings de consola** en toda la sesión
+  de pruebas (Home → detalle → lightbox → navegación → menú móvil).
 
 **Hallazgo adicional de esta sesión de ejecución:** `origin/main` en GitHub
 está detenido en "Fase E" — las Fases F, G, H, I.0, I.1 e I.2 (9 commits)
@@ -214,23 +235,36 @@ Cada bloque se completa y valida antes de continuar al siguiente.
   configuración de Vercel) — se commitea solo la actualización de este
   documento.
 
-### Bloque 6 — Push y Preview Deployment
+### Bloque 6 — Push y Preview Deployment ✅ Completo
 
-- **A implementar:** `git push origin cutover-preflight`.
-- **A verificar:** Vercel genera un Preview Deployment; monitorear el log de
-  build hasta `Ready`; confirmar en el log: Framework reconocido como
-  Next.js, comando de build ejecutado (`npm run build:next`), `images:check`
-  exitoso.
+- **Implementado:** `git push -u origin cutover-preflight`.
+- **Verificado:** Vercel generó automáticamente
+  `https://joseph-dayan-bfivf43pm-josephd.vercel.app`
+  (Environment: Preview). Log de build confirmado línea por línea:
+  `Detected Next.js version: 16.2.10`; `Running "npm run build:next"`;
+  `images:check OK — 8 imágenes verificadas contra el manifest.`;
+  `✓ Compiled successfully`; `Running TypeScript ... Finished TypeScript`;
+  21 páginas generadas; `Build Completed`; estado final `Ready`.
+- **Documentado:** esta sección + apartado de progreso arriba.
+- **Commit:** siguiente en este mismo turno.
 
-### Bloque 7 — Validación funcional completa contra el Preview
+### Bloque 7 — Validación funcional completa contra el Preview ✅ Completo
 
-- **A verificar (checklist obligatoria del pedido original):** instalación
-  limpia ✓ (Bloque 4), build limpio ✓ (Bloque 4), TypeScript limpio ✓ (cada
-  bloque), sitio funcionando en Preview, favicon correcto ✓ (Bloque 1),
-  metadata correcta, imágenes funcionando, API funcionando (`/api/subscribe`
-  responde desde Next.js, no desde el archivo borrado), Lightbox funcionando
-  en producción real (Preview, no `next dev`), navegación completa, cero
-  errores de consola, cero errores de build.
+- **Verificado, ítem por ítem (checklist obligatoria del pedido original):**
+  - Instalación limpia ✓ (Bloque 4, `npm ci`).
+  - Build limpio ✓ (Bloque 4 local + Bloque 6 en Vercel/Linux real).
+  - TypeScript limpio ✓ (cada bloque + dentro del build de Vercel).
+  - Sitio funcionando en Preview ✓ (`/` → `200`, HTML real de Next.js).
+  - Favicon correcto ✓ (`<link rel="icon" href="/favicon.svg">` en el HTML del Preview).
+  - Metadata correcta ✓ (`<title>`, `og:title`, `og:description`, `og:image` con la URL real).
+  - Imágenes funcionando ✓ (`/_next/image?...` → `200`, contenido binario real).
+  - API funcionando ✓ (`POST /api/subscribe` → `200 {"ok":true}`, resuelto por Next.js).
+  - Lightbox funcionando en producción real ✓ (Playwright contra el Preview: abre, foco atrapado, `aria-hidden` en el resto, `Escape` cierra y devuelve foco).
+  - Navegación completa ✓ (nav de escritorio, `MobileMenu` en 375px, Breadcrumb, todas las rutas verificadas).
+  - Ausencia de errores de consola ✓ (cero errores, cero warnings, en toda la sesión).
+  - Ausencia de errores de build ✓ (Bloque 6, log completo revisado).
+- **Documentado:** esta sección + apartado de progreso arriba.
+- **Commit:** siguiente en este mismo turno.
 
 ---
 
@@ -252,13 +286,19 @@ cutover para el nivel 2.
 ### Checklist de esta fase (Preview, no producción)
 
 - [x] Favicon corregido y verificado (Bloque 1).
-- [ ] `api/subscribe.js`/`api/chat.js` borrados (Bloque 2).
-- [ ] `vercel.json` actualizado (Bloque 3).
-- [ ] Instalación + build limpios verificados (Bloque 4).
-- [ ] `NEXT_PUBLIC_SITE_URL` en Preview (Bloque 5).
-- [ ] Rama pusheada, Preview Deployment `Ready` (Bloque 6).
-- [ ] Validación funcional completa contra el Preview (Bloque 7): metadata,
+- [x] `api/subscribe.js`/`api/chat.js` borrados (Bloque 2).
+- [x] `vercel.json` actualizado (Bloque 3).
+- [x] Instalación + build limpios verificados (Bloque 4).
+- [x] `NEXT_PUBLIC_SITE_URL` en Preview (Bloque 5).
+- [x] Rama pusheada, Preview Deployment `Ready` (Bloque 6).
+- [x] Validación funcional completa contra el Preview (Bloque 7): metadata,
       imágenes, API, Lightbox, navegación, consola, build — todo en verde.
+
+**Los 7 bloques de esta fase están completos.** Preview Deployment
+funcional: `https://joseph-dayan-bfivf43pm-josephd.vercel.app`.
+Producción no se tocó en ningún momento — sigue sirviendo Vite/Artora. El
+cutover real a `main`/producción queda pendiente de aprobación explícita
+separada (ver checklist siguiente, fuera de alcance de esta fase).
 
 ### Checklist que queda para una fase posterior (cutover real a producción — NO parte de esta fase)
 
