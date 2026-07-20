@@ -29,7 +29,13 @@ producción). Progreso:
   `node_modules` fresco. `sharp` deja de ser un supuesto: funciona en una
   instalación limpia, no solo sobre el `node_modules` incremental usado en
   cada fase anterior.
-- [ ] PFV-7 — `NEXT_PUBLIC_SITE_URL` en Vercel (entorno Preview).
+- [x] **PFV-7 — `NEXT_PUBLIC_SITE_URL` en Vercel.** Agregada con
+  `vercel env add NEXT_PUBLIC_SITE_URL preview --value
+  "https://art-marketplace-ruddy.vercel.app"`, **únicamente en el entorno
+  Preview** (verificado con `vercel env ls`: `Environments: Preview`, sin
+  Production). Se agrega antes del Preview Deployment (Bloque 6) para que
+  ese build ya lea el valor correcto en `metadataBase`, no el fallback
+  inexistente.
 - [ ] PFV-4 — push de la rama, Preview Deployment, verificación funcional completa.
 
 **Hallazgo adicional de esta sesión de ejecución:** `origin/main` en GitHub
@@ -196,12 +202,17 @@ Cada bloque se completa y valida antes de continuar al siguiente.
   puramente verificación) — solo se commitea la actualización de este
   documento.
 
-### Bloque 5 — `NEXT_PUBLIC_SITE_URL` en Vercel (Preview)
+### Bloque 5 — `NEXT_PUBLIC_SITE_URL` en Vercel (Preview) ✅ Completo
 
-- **A implementar:** agregar la variable en Vercel, **entorno Preview
-  únicamente** en este bloque (Production se deja para el cutover real,
-  fuera de alcance aquí).
-- **A verificar:** `vercel env ls` muestra la variable con Preview marcado.
+- **Implementado:** `vercel env add NEXT_PUBLIC_SITE_URL preview --value
+  "https://art-marketplace-ruddy.vercel.app"` — únicamente entorno Preview;
+  Production queda sin tocar, fuera de alcance de esta fase.
+- **Verificado:** `vercel env ls` confirma `Environments: Preview` para esa
+  variable, sin Production.
+- **Documentado:** esta sección + apartado de progreso arriba.
+- **Commit:** este bloque no modifica archivos del repo (es una
+  configuración de Vercel) — se commitea solo la actualización de este
+  documento.
 
 ### Bloque 6 — Push y Preview Deployment
 
