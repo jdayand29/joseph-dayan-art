@@ -17,7 +17,10 @@ producción). Progreso:
   `src/app/api/subscribe/route.ts` sigue intacto y es ahora el único
   resolutor de esa ruta; cero referencias colgantes a los archivos borrados
   en todo el repo (grep de `api/subscribe.js`/`api/chat.js`: vacío).
-- [ ] `vercel.json`: `framework: nextjs` + `buildCommand: npm run build:next`.
+- [x] **`vercel.json` actualizado.** `"framework": "nextjs"` +
+  `"buildCommand": "npm run build:next"`, sin `rewrites` (el catch-all a
+  `/index.html` habría roto el enrutamiento de Next.js). JSON validado,
+  `tsc --noEmit` limpio.
 - [ ] PFV-1/PFV-2 — instalación limpia + build limpio equivalente a Vercel.
 - [ ] PFV-7 — `NEXT_PUBLIC_SITE_URL` en Vercel (entorno Preview).
 - [ ] PFV-4 — push de la rama, Preview Deployment, verificación funcional completa.
@@ -158,17 +161,20 @@ Cada bloque se completa y valida antes de continuar al siguiente.
 - **Documentado:** esta sección + apartado de progreso arriba.
 - **Commit:** siguiente en este mismo turno.
 
-### Bloque 3 — `vercel.json`
+### Bloque 3 — `vercel.json` ✅ Completo
 
-- **A implementar:** reemplazar el archivo completo:
+- **Implementado:** archivo reemplazado por:
   ```json
   {
     "framework": "nextjs",
     "buildCommand": "npm run build:next"
   }
   ```
-- **A verificar:** JSON válido; `tsc --noEmit` limpio (no afecta TS, pero se
-  corre igual como red de seguridad).
+  Se elimina el bloque `rewrites` completo (el catch-all a `/index.html`
+  rompería el enrutamiento de Next.js, que no tiene ese archivo).
+- **Verificado:** JSON válido (parseado sin error); `tsc --noEmit` limpio.
+- **Documentado:** esta sección + apartado de progreso arriba.
+- **Commit:** siguiente en este mismo turno.
 
 ### Bloque 4 — Instalación y build limpios (PFV-1/PFV-2)
 
